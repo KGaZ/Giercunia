@@ -1,0 +1,12 @@
+me/kgaz/garbage/Dispose.java
+ me.kgaz.garbage.Dispose
+me/kgaz/garbage/DisposeManager.java
+ me.kgaz.garbage.DisposeManager
+me/kgaz/FontManager.java
+ me.kgaz.FontManager
+me/kgaz/screens/GameScreen.java
+ me.kgaz.screens.GameScreen
+me/kgaz/Main.java
+ me.kgaz.Main
+me/kgaz/screens/MenuScreen.java
+ me.kgaz.screens.MenuScreen
