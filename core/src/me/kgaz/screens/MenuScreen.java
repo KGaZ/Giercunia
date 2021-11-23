@@ -3,10 +3,15 @@ package me.kgaz.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import me.kgaz.Main;
+import me.kgaz.userInterface.UIManager;
+import me.kgaz.userInterface.elements.Button;
 
 public class MenuScreen implements Screen {
 
@@ -14,29 +19,29 @@ public class MenuScreen implements Screen {
     private OrthographicCamera camera;
     private SpriteBatch batch;
 
+    private Texture background;
+
+    private UIManager uiManager;
+
     public MenuScreen(Main game){
 
         this.handler = game;
 
+        this.uiManager = new UIManager();
+
+        uiManager.addUiElement(new Button(835, 500, 250, 100, "beta/textures/buttonStart.png"));
+
+        game.getDisposeManager().registerDisposable(uiManager);
+
         this.batch = game.batch;
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1024, 960);
+        camera.setToOrtho(false, 1920, 1080);
 
     }
 
-    private int i = 0;
-
     @Override
     public void render(float delta) {
-
-        System.out.println(i);
-
-        i++;
-
-        if(i==255) i = -255;
-
-        ScreenUtils.clear(i > 0 ? i/255f : -i/255f, 0, i > 0 ? i/255f : -i/255f, 0);
 
         camera.update();
 
@@ -44,16 +49,31 @@ public class MenuScreen implements Screen {
 
         this.batch.begin();
 
-        handler.manager.ESTONIA.draw(batch, "Jebac Disa Kurwe Zwisa", 100, 700);
+        ScreenUtils.clear(0,0,0,0);
 
-        this.batch.end();
+        { // UI Manager
 
-        if(Gdx.input.isTouched()){
+            Vector3 mousePos = new Vector3();
 
-            handler.setScreen(new GameScreen(handler));
-            dispose();
+            mousePos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+
+            camera.unproject(mousePos);
+
+            uiManager.update(mousePos.x, mousePos.y);
+
+            uiManager.render(batch);
 
         }
+
+        handler.batch.draw(handler.getAssets().TILESET_PLAINS.findRegion("tile025"), 0, 0);
+
+        handler.manager.ARIAL.draw(batch, "FPS: "+Gdx.graphics.getFramesPerSecond()+". Ver. InDev 1\nFrame Time: "+Gdx.graphics.getDeltaTime()+"ms", 0, 1080);
+
+        handler.manager.ESTONIA_192.setColor(Color.WHITE);
+
+        handler.manager.ESTONIA_192.draw(batch, "Jump King 2", 750, 840);
+
+        this.batch.end();
 
     }
 

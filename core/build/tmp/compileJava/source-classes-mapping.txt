@@ -1,12 +1,28 @@
-me/kgaz/garbage/Dispose.java
- me.kgaz.garbage.Dispose
-me/kgaz/garbage/DisposeManager.java
- me.kgaz.garbage.DisposeManager
-me/kgaz/FontManager.java
- me.kgaz.FontManager
+me/kgaz/assets/FontManager.java
+ me.kgaz.assets.FontManager
+me/kgaz/userInterface/elements/Button.java
+ me.kgaz.userInterface.elements.Button
 me/kgaz/screens/GameScreen.java
  me.kgaz.screens.GameScreen
-me/kgaz/Main.java
- me.kgaz.Main
+me/kgaz/userInterface/UI.java
+ me.kgaz.userInterface.UI
 me/kgaz/screens/MenuScreen.java
  me.kgaz.screens.MenuScreen
+me/kgaz/world/Tiles.java
+ me.kgaz.world.Tiles
+me/kgaz/garbage/DisposeManager.java
+ me.kgaz.garbage.DisposeManager
+me/kgaz/garbage/Dispose.java
+ me.kgaz.garbage.Dispose
+me/kgaz/world/Tile.java
+ me.kgaz.world.Tile
+me/kgaz/assets/Assets.java
+ me.kgaz.assets.Assets
+me/kgaz/userInterface/UIManager.java
+ me.kgaz.userInterface.UIManager
+me/kgaz/screens/TestLevelScreen.java
+ me.kgaz.screens.TestLevelScreen
+me/kgaz/Main.java
+ me.kgaz.Main
+me/kgaz/world/Level.java
+ me.kgaz.world.Level

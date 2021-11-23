@@ -1,13 +1,15 @@
-package me.kgaz;
+package me.kgaz.assets;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import me.kgaz.Main;
 import me.kgaz.garbage.Dispose;
 
 public class FontManager implements Dispose {
 
-    public final BitmapFont ESTONIA;
+    public final BitmapFont ESTONIA_192;
+    public final BitmapFont ARIAL;
 
     public FontManager(final Main game){
 
@@ -16,8 +18,14 @@ public class FontManager implements Dispose {
         { // ESTONIA
 
             FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            parameter.size = 102;
-            ESTONIA = generator.generateFont(parameter);
+            parameter.size = 124;
+            ESTONIA_192 = generator.generateFont(parameter);
+
+        }
+
+        { // ARIAL
+
+            ARIAL = new BitmapFont();
 
         }
 
@@ -31,7 +39,8 @@ public class FontManager implements Dispose {
     @Override
     public void dispose() {
 
-        ESTONIA.dispose();
+        ESTONIA_192.dispose();
+        ARIAL.dispose();
 
     }
 }

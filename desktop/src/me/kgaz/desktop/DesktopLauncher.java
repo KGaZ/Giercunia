@@ -6,14 +6,21 @@ import me.kgaz.Main;
 
 public class DesktopLauncher {
 
+	public static final int GAME_WIDTH = 1920;
+	public static final int GAME_HEIGHT = 1080;
+
 	public static void main (String[] arg) {
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 
 		config.title = "Jump King 2";
 
-		config.width = 1024;
-		config.height = 960;
+		config.width = 1440;
+		config.height = 810;
+
+		config.fullscreen = true;
+
+		config.resizable = false;
 
 		//config.resizable = false;
 
