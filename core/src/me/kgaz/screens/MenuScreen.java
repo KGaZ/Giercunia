@@ -7,11 +7,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import me.kgaz.Main;
 import me.kgaz.userInterface.UIManager;
 import me.kgaz.userInterface.elements.Button;
+import me.kgaz.world.Level;
+import me.kgaz.world.levels.MenuLevel;
 
 public class MenuScreen implements Screen {
 
@@ -19,17 +22,28 @@ public class MenuScreen implements Screen {
     private OrthographicCamera camera;
     private SpriteBatch batch;
 
-    private Texture background;
-
     private UIManager uiManager;
 
+    private Level levelBackground;
+
     public MenuScreen(Main game){
+
+       this.levelBackground = new MenuLevel(game.getAssets());
 
         this.handler = game;
 
         this.uiManager = new UIManager();
 
-        uiManager.addUiElement(new Button(835, 500, 250, 100, "beta/textures/buttonStart.png"));
+        Button start = new Button(835, 500, 250, 100, "beta/textures/buttonStart.png");
+
+        start.setClickAction(new Runnable() {
+            @Override
+            public void run() {
+                game.setScreen(new GameScreen(game, levelBackground));
+            }
+        });
+
+        uiManager.addUiElement(start);
 
         game.getDisposeManager().registerDisposable(uiManager);
 
@@ -51,6 +65,8 @@ public class MenuScreen implements Screen {
 
         ScreenUtils.clear(0,0,0,0);
 
+        levelBackground.render(batch);
+
         { // UI Manager
 
             Vector3 mousePos = new Vector3();
@@ -64,10 +80,6 @@ public class MenuScreen implements Screen {
             uiManager.render(batch);
 
         }
-
-        handler.batch.draw(handler.getAssets().TILESET_PLAINS.findRegion("tile025"), 0, 0);
-
-        handler.manager.ARIAL.draw(batch, "FPS: "+Gdx.graphics.getFramesPerSecond()+". Ver. InDev 1\nFrame Time: "+Gdx.graphics.getDeltaTime()+"ms", 0, 1080);
 
         handler.manager.ESTONIA_192.setColor(Color.WHITE);
 

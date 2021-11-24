@@ -4,140 +4,53 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import me.kgaz.assets.Assets;
+import me.kgaz.physics.Position;
+import me.kgaz.player.Player;
 
 import java.io.*;
 import java.util.Scanner;
 
-public class Level {
+public abstract class Level {
 
-
-    private TextureRegion foreGround;
-    private TextureRegion backGround;
-    private int[][] tileSet;
+    protected TextureRegion foreGround;
+    protected TextureRegion backGround;
+    protected int[][] tileSet;
 
     private Tiles TILESET;
 
-    public Level(Assets assets) {
-
-        tileSet = new int[240][135];
+    public Level(Assets assets, TextureRegion backGround, TextureRegion foreGround) {
 
         TILESET = assets.TILESET;
 
-        backGround = assets.LEVEL_BACKGROUNDS.findRegion("plainsBackground");
+        this.backGround = backGround;
+        this.foreGround = foreGround;
 
-        foreGround = null;
-
-        for(int h = 0; h < 240; h++) {
-
-            for(int i = 0; i < 135; i++) tileSet[h][i] = 0;
-
-        }
-
-        for(int h = 0; h < 240; h++) {
-
-            for(int i = 0; i < 22; i++) {
-
-                tileSet[h][i] = 1;
-
-            }
-
-        }
-        save("xd");
+        tileSet = buildLevel();
 
     }
 
-    @Deprecated
-    public void save(String path) {
+    public abstract int[][] buildLevel();
 
+    // can be overriden
 
-            // file.createNewFile();
+    public boolean isSolid(Position pos) {
 
-            // FileWriter writer = new FileWriter(file);
-
-            System.out.println("plainsBackground");
-            System.out.println("null");
-            for(int i = 0; i < 4; i++) System.out.println("null");
-            for(int i = 0; i < 135; i++) {
-
-                StringBuilder bath = new StringBuilder();
-
-                for(int h = 0; h < 240; h++) {
-
-                    bath.append(tileSet[h][i]).append(" ");
-
-                }
-
-                System.out.println(bath.toString());
-
-            }
-
-            //writer.flush();
-            //writer.close();
-
+        return isSolid(pos.x, pos.y);
 
     }
 
-    public Level(Assets assets, String pathToFile){
+    public boolean isSolid(float x, float y) {
 
-        tileSet = new int[240][135];
+        int tileX = (int) Math.floor(x/Tile.TILE_SIZE);
+        int tileY = (int) Math.floor(y/Tile.TILE_SIZE);
 
-        TILESET = assets.TILESET;
+        return TILESET.tileSet[tileSet[tileX][tileY]].isSolid((int) (x-tileX), (int) (y-tileY));
 
-        File file = new File(pathToFile);
+    }
 
-        try {
+    public Position getDefaultPosition(){
 
-            Scanner scanner = new Scanner(file);
-
-            int skip = 0;
-
-            int row = 0;
-            int column = 0;
-
-            { // level data
-
-                backGround = assets.LEVEL_BACKGROUNDS.findRegion(scanner.nextLine());
-                foreGround = null;scanner.nextLine(); //TODO
-                scanner.nextLine();
-                scanner.nextLine();
-                scanner.nextLine();
-                scanner.nextLine();
-
-
-            }
-
-            while(scanner.hasNextLine()) {
-
-                String data = scanner.nextLine();
-
-                column = 0;
-
-                for(String line : data.split(" ")) {
-
-                    if(column == 135) break;
-
-                    tileSet[row][column] = Integer.parseInt(line);
-                    column++;
-
-                }
-
-                row++;
-            }
-
-            if(row != 239) {
-
-                System.exit(0);
-
-            }
-
-            scanner.close();
-
-        } catch (FileNotFoundException e) {
-
-            e.printStackTrace();
-
-        }
-
+        return new Position(0, 1080- Player.PLAYER_HEIGHT);
 
     }
 
@@ -155,8 +68,11 @@ public class Level {
 
         }
 
-        if(foreGround != null) batch.draw(foreGround, 0, 0, 1920, 1080);
+    }
 
+    public void renderForeGround(SpriteBatch batch) {
+
+        if(foreGround != null) batch.draw(foreGround, 0, 0, 1920, 1080);
 
     }
 

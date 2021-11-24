@@ -1,17 +1,29 @@
 package me.kgaz.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import me.kgaz.Main;
+import me.kgaz.player.Player;
+import me.kgaz.world.Level;
+import me.kgaz.world.levels.MenuLevel;
 
 public class GameScreen implements Screen {
 
     private final Main game;
 
-    public GameScreen(final Main main) {
+    private Level currentLevel;
 
-        game = main;
+    private final Player player;
 
+    public GameScreen(final Main main, Level start) {
+
+        this.game = main;
+
+        this.player = new Player(main, start.getDefaultPosition());
+
+        this.currentLevel = start;
     }
 
     @Override
@@ -24,6 +36,19 @@ public class GameScreen implements Screen {
 
         ScreenUtils.clear(0, 0, 0, 0);
 
+        SpriteBatch batch = game.batch;
+
+        game.batch.begin();
+
+        currentLevel.render(game.batch);
+
+        player.render(batch, currentLevel);
+
+        currentLevel.renderForeGround(game.batch);
+
+        game.manager.ARIAL.draw(batch, "FPS: "+ Gdx.graphics.getFramesPerSecond()+". Ver. InDev 1.01\nFrame Time: "+Gdx.graphics.getDeltaTime()+"ms\nX: "+player.loc.x+" Y: "+player.loc.y, 0, 1080);
+
+        game.batch.end();
     }
 
     @Override

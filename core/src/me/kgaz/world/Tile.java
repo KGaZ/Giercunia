@@ -25,7 +25,7 @@ public class Tile {
 
     }
 
-    private boolean isSolid(int x, int y) {
+    public boolean isSolid(int x, int y) {
         return solid;
     }
 

@@ -13,8 +13,13 @@ public class Assets implements Dispose {
 
     public final Tiles TILESET;
 
+    //temp
+    public final TextureAtlas PLAYER_TEXTURES;
+
 
     public Assets(Main main){
+
+        PLAYER_TEXTURES = new TextureAtlas("beta/textures/player/playerPack.atlas");
 
         LEVEL_BACKGROUNDS = new TextureAtlas("beta/atlases/backgroundAtlas.atlas");
 
@@ -27,6 +32,7 @@ public class Assets implements Dispose {
     @Override
     public void dispose(){
 
+        PLAYER_TEXTURES.dispose();
         TILESET_PLAINS.dispose();
         LEVEL_BACKGROUNDS.dispose();
 

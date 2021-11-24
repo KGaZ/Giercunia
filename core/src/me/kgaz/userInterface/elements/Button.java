@@ -14,8 +14,12 @@ public class Button extends UI {
     private int heightDiff;
     private int widthDiff;
 
+    private Runnable clickAction;
+
     public Button(int x, int y, int width, int height, String pathToTexture) {
         super(x, y, width, height);
+
+        clickAction = null;
 
         widthExtended = (int) (width*1.1);
         heightExtended = (int) (height*1.1);
@@ -29,8 +33,13 @@ public class Button extends UI {
     @Override
     public void onClick() {
 
-        System.out.println("clicked");
+        if(clickAction != null) clickAction.run();
 
+    }
+
+    public void setClickAction(Runnable run) {
+
+        this.clickAction = run;
     }
 
     @Override

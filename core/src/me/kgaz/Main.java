@@ -7,8 +7,8 @@ import me.kgaz.assets.Assets;
 import me.kgaz.assets.FontManager;
 import me.kgaz.garbage.DisposeManager;
 import me.kgaz.screens.MenuScreen;
-import me.kgaz.screens.TestLevelScreen;
 import me.kgaz.world.Level;
+import me.kgaz.world.levels.MenuLevel;
 
 public class Main extends Game {
 
@@ -31,7 +31,8 @@ public class Main extends Game {
 		batch = new SpriteBatch();
 		font = new BitmapFont();
 
-		this.setScreen(new TestLevelScreen(this, new Level(this.assets)));
+		//this.setScreen(new TestLevelScreen(this, new MenuLevel(this.assets)));
+		this.setScreen(new MenuScreen(this));
 
 	}
 
