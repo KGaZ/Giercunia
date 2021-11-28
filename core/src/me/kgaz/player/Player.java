@@ -7,17 +7,24 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import me.kgaz.Main;
+import me.kgaz.physics.CollisionBox;
+import me.kgaz.physics.CollisionCheck;
 import me.kgaz.physics.Position;
 import me.kgaz.physics.Vector;
+import me.kgaz.screens.GameScreen;
 import me.kgaz.world.Level;
 
 public class Player {
 
+    private CollisionBox collision;
+
     public Position loc;
+
+    public static final Vector GRAVITY = new Vector(0, -5);
 
     public static final int PLAYER_HEIGHT = 64, PLAYER_WIDTH = 64;
 
-    public static final float PLAYER_SPEED = 12;
+    public static final float PLAYER_SPEED = 2;
 
     private Main game;
 
@@ -27,11 +34,16 @@ public class Player {
 
     private TextureRegion STANDING;
 
+    private GameScreen screen;
+
+    private Vector GRAVITY_VECTOR;
+    private Vector INPUT_VECTOR;
+
     private Vector velocity;
 
-    public Player(Main owner, Position position) {
+    public Player(Main owner, Position position, GameScreen gameScreen) {
 
-        this.velocity = new Vector(0, 0);
+        this.screen = gameScreen;
 
         this.playerAtlas = owner.getAssets().PLAYER_TEXTURES;
 
@@ -42,6 +54,14 @@ public class Player {
         this.loc = position;
 
         this.facing = true;
+
+        this.collision = new CollisionBox();
+
+        GRAVITY_VECTOR = new Vector(0, 0);
+        INPUT_VECTOR = new Vector(0, 0);
+
+        velocity = new Vector(0, 0);
+
     }
 
     private Vector getInputVector(){
@@ -60,34 +80,76 @@ public class Player {
 
         }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
-
-            vector.y+=1;
-
-        }
-
-        if(Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
-
-            vector.y-=1;
-
-        }
+//        if(Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) {
+//
+//            vector.y+=1;
+//
+//        }
+//
+//        if(Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
+//
+//            vector.y-=1;
+//
+//        }
 
         return vector.normalize().multiply(PLAYER_SPEED);
+
+    }
+
+    public boolean isOnGround(){
+
+        return screen.getDisplayedLevel().isSolid(new Position(loc.x, loc.y-1)) || screen.getDisplayedLevel().isSolid(new Position(loc.x+PLAYER_WIDTH, loc.y-1));
+
+    }
+
+    private void updateVectors(){
+
+        Vector input = getInputVector();
+
+        if(isOnGround()) {
+
+            GRAVITY_VECTOR.multiply(0);
+
+            INPUT_VECTOR.add(input);
+
+            INPUT_VECTOR.x *= 0.83;
+
+            if(Math.abs(INPUT_VECTOR.x) < 0.5) INPUT_VECTOR.x = 0;
+
+            if(Math.abs(INPUT_VECTOR.x) > 6) INPUT_VECTOR.x = INPUT_VECTOR.x > 0 ? 6 : -6;
+
+        } else {
+
+            if(GRAVITY_VECTOR.y == 0) {
+
+                GRAVITY_VECTOR.y = -2.5f;
+
+            }
+
+            INPUT_VECTOR.add(input.multiply(0.55));
+
+            INPUT_VECTOR.x *= 0.82;
+
+            GRAVITY_VECTOR.multiply(1.09);
+
+            if(GRAVITY_VECTOR.y < -35) GRAVITY_VECTOR.y = -35;
+
+        }
+
 
     }
 
 
     private void calcVectors(){
 
-        Vector calc = new Vector(0, 0);
+        updateVectors();
 
-        calc.add(getInputVector());
+        velocity = new Vector(0, 0).add(INPUT_VECTOR).add(GRAVITY_VECTOR);
+    }
 
-        this.velocity = calc;
+    public void click(float x, float y) {
 
-        if(velocity.x == 0) return;
-
-        facing = velocity.x > 0;
+        this.loc = new Position(x, y);
 
     }
 
@@ -95,11 +157,13 @@ public class Player {
 
         calcVectors();
 
-        Position copy = new Position(loc.x+velocity.x, loc.y+ velocity.y);
-
-        if(level.isSolid(copy)) return;
+        velocity = collision.checkMovement(velocity, loc, level);
 
         loc.add(velocity);
+
+        if(velocity.x == 0) return;
+
+        facing = velocity.x > 0;
 
     }
 
@@ -110,6 +174,7 @@ public class Player {
 
         if(facing) batch.draw(STANDING, loc.x, loc.y, PLAYER_WIDTH, PLAYER_HEIGHT);
         else batch.draw(STANDING, loc.x+PLAYER_WIDTH, loc.y, -PLAYER_WIDTH, PLAYER_HEIGHT);
+
 
     }
 

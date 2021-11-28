@@ -44,6 +44,9 @@ public abstract class Level {
         int tileX = (int) Math.floor(x/Tile.TILE_SIZE);
         int tileY = (int) Math.floor(y/Tile.TILE_SIZE);
 
+        if(tileX < 0 || tileX >= 240) return true;
+        if(tileY < 0 || tileY >= 135) return true;
+
         return TILESET.tileSet[tileSet[tileX][tileY]].isSolid((int) (x-tileX), (int) (y-tileY));
 
     }

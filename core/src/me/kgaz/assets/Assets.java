@@ -13,11 +13,16 @@ public class Assets implements Dispose {
 
     public final Tiles TILESET;
 
-    //temp
     public final TextureAtlas PLAYER_TEXTURES;
+
+    //temp
+
+    public final Texture GREEN_DOT;
 
 
     public Assets(Main main){
+
+        GREEN_DOT = new Texture("beta/textures/greenDot.png");
 
         PLAYER_TEXTURES = new TextureAtlas("beta/textures/player/playerPack.atlas");
 
@@ -35,6 +40,7 @@ public class Assets implements Dispose {
         PLAYER_TEXTURES.dispose();
         TILESET_PLAINS.dispose();
         LEVEL_BACKGROUNDS.dispose();
+        GREEN_DOT.dispose();
 
     }
 
