@@ -18,7 +18,8 @@ public class MenuLevel extends Level {
         return new LevelBuilder().setGroundLevel(20).
                 fillBlock(0, 0, 20, 100).
                 fillBlock(70, 0, 100, 70).
-                fillBlock(40, 50, 20, 5).build();
+                fillBlock(40, 50, 20, 5).
+                build();
     }
 
 }

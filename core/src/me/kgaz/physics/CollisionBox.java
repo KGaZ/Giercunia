@@ -2,136 +2,79 @@ package me.kgaz.physics;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
+import me.kgaz.assets.Assets;
 import me.kgaz.world.Level;
 
 public class CollisionBox {
 
-    private Array<CollisionCheck> xChecks;
-    private Array<CollisionCheck> yChecks;
-//0 -50
-//12-48
-    public CollisionBox(){
+    public Array<CollisionCheck> colliionChecks;
 
-        xChecks = new Array<CollisionCheck>();
-        yChecks = new Array<CollisionCheck>();
+    public CollisionBox(Assets assets){
 
-        {//x CHECKS
+        Texture t = assets.GREEN_DOT;
 
-            xChecks.add(new CollisionCheck(30, 0));
+        colliionChecks = new Array<CollisionCheck>();
 
-            xChecks.add(new CollisionCheck(30, 50));
+        for(int i = 0; i <= 6; i++) {
 
-        }
+            for(int h = 0; h <= 8; h++) {
 
-        {//x CHECKS
+                int x = 12 + (i*6);
 
-            yChecks.add(new CollisionCheck(12, 25));
+                int y = (h*6);
 
-            yChecks.add(new CollisionCheck(48, 25));
-
-        }
-
-        {//Both Checks
-
-            CollisionCheck lD = new CollisionCheck(12, 0);
-            CollisionCheck lU = new CollisionCheck(12, 50);
-            CollisionCheck pD = new CollisionCheck(48, 0);
-            CollisionCheck pU = new CollisionCheck(48, 50);
-
-            yChecks.add(lD);xChecks.add(lD);
-            yChecks.add(lU);xChecks.add(lU);
-            yChecks.add(pD);xChecks.add(pD);
-            yChecks.add(pU);xChecks.add(pU);
-
-        }
-
-    }
-
-    public Vector checkMovement(Vector movement, Position pos, Level level) {
-
-        int moveX = (int) movement.x, moveY = (int) movement.y;
-
-        if(moveX != 0) {
-
-            if(moveX > 0) {
-
-                for(CollisionCheck rightChecks : xChecks) {
-
-                    if(rightChecks.relativeX == 48) {
-
-                        int move = rightChecks.checkDistanceRight(moveX, pos, level);
-
-                        if(moveX > move) moveX = move;
-
-                        if(move == 0) break;
-
-                    }
-
-                }
-
-            } else {
-
-                for(CollisionCheck upChecks : xChecks) {
-
-                    if(upChecks.relativeX == 12) {
-
-                        int move = upChecks.checkDistanceLeft(-moveX, pos, level);
-
-                        if(moveX < move) moveX = move;
-
-                        if(move == 0) break;
-
-                    }
-
-                }
+                if((x == 12 || x == 48) || (y == 0 || y == 48)) colliionChecks.add(new CollisionCheck(x, y, t));
 
             }
 
         }
 
-        if(moveY != 0) {
+    }
 
-            if(moveY > 0) {
+    public Vector calculateMovement(Vector movement, Position position, Level level) {
 
-                for(CollisionCheck upChecks : yChecks) {
+        int possibleX = (int) movement.x, possibleY = (int) movement.y;
 
-                    if(upChecks.relativeY == 50) {
+        for(CollisionCheck check : colliionChecks) {
 
-                        int move = upChecks.checkDistanceUp(moveY, pos, level, movement);
+            Vector possible = check.calculateMovement(movement, position, level);
 
-                        if(moveY > move) moveY = move;
+            if(possibleX < 0 && possible.x > possibleX) {
+                possibleX = (int) possible.x;
+            } else if(possibleX >= 0 && possible.x < possibleX) possibleX = (int) possible.x;
 
-                        if(move == 0) break;
+            if(possibleY< 0 && possible.y > possibleY) {
+                possibleY = (int) possible.y;
+            } else if(possibleY >= 0 && possible.y < possibleY) possibleY = (int) possible.y;
 
-                    }
-
-                }
-
-            } else {
-
-                for(CollisionCheck downChecks : yChecks) {
-
-                    if(downChecks.relativeY == 0) {
-
-                        int move = downChecks.checkDistanceDown(-moveY, pos, level, movement);
-
-                        if(moveY < move) moveY = move;
-
-                        if(move == 0) break;
-
-                    }
-
-                }
-
-            }
+            if(possibleX == 0 && possibleY == 0) return new Vector(0,0);
 
         }
 
-        return new Vector(moveX, moveY);
+        return new Vector(possibleX, possibleY);
 
     }
 
+    public boolean isOnGround(Position position, Level level) {
 
+        Position newPos = new Position(position.x, position.y-1);
+
+        for(CollisionCheck check : colliionChecks) {
+
+            if(check.isInBlock(newPos,level)) return true;
+
+        }
+
+        return false;
+
+    }
+
+    public void render(SpriteBatch batch, Position position, Level level){
+
+        colliionChecks.forEach(check -> check.render(batch, position, level));
+
+    }
 
 }

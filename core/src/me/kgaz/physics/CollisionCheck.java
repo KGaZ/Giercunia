@@ -1,118 +1,108 @@
 package me.kgaz.physics;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import me.kgaz.world.Level;
 
 public class CollisionCheck {
 
-    public int relativeX;
-    public int relativeY;
+    private int relativeX, relativeY;
 
-    public CollisionCheck(int x, int y){
+    private Texture region;
 
-        this.relativeX = x;
-        this.relativeY = y;
+    public CollisionCheck(int relativeX, int relativeY, Texture textureRegion) {
+
+        this.relativeX = relativeX;
+        this.relativeY = relativeY;
+
+        region = textureRegion;
+    }
+
+    public Vector calculateMovement(Vector vector, Position position, Level level) {
+
+        int moveX = 0;
+        int moveY = 0;
+
+        if(vector.y > 0) moveY = calculatePossibleMoveUp((int) Math.ceil(vector.y), position, level);
+        else if(vector.y < 0) moveY = -calculatePossibleMoveDown((int) Math.floor(-vector.y), position, level);
+
+        if(vector.x > 0) moveX = calculatePossibleMoveRight((int) Math.ceil(vector.x), position, level);
+        else if(vector.x < 0) moveX = -calculatePossibleMoveLeft((int) Math.floor(-vector.x), position, level);
+
+        return new Vector(moveX, moveY);
 
     }
 
-//    public Vector checkAvailableMovement(Vector movement, Position position, Level level) {
-//
-//        return new Vector(checkDistanceX((int) movement.x, position, level), checkDistanceY((int) movement.y, position, level));
-//
-//    }
+    public int calculatePossibleMoveRight(int capacity, Position position, Level level) {
 
-    public int checkDistanceUp(int capacity, Position position, Level level, Vector velocity) {
+        int possibleMove = 0;
 
-        Position cPos = new Position(relativeX+position.x, relativeY+position.y);
+        for(int i = 1; i < capacity; i++) {
 
-        int diffX = velocity.x < 0 ? 1 : -1;
+            if(level.isSolid(position.x+relativeX+i, position.y+relativeY)) break;
 
-        if(velocity.x == 0) diffX = 0;
-
-        for(int i = 0; i < capacity; i++) {
-
-            if(level.isSolid(cPos.x+diffX, cPos.y+i)) {
-
-                return i;
-
-            }
-
+            possibleMove++;
         }
 
-        return capacity;
+        return possibleMove;
 
     }
 
-//    public int checkDistanceY(int capacity, Position position, Level level) {
-//
-//        if(capacity > 0) return checkDistanceUp(capacity, position, level);
-//        else if (capacity == 0) return 0;
-//        else return checkDistanceDown(-capacity, position, level);
-//
-//    }
+    public int calculatePossibleMoveLeft(int capacity, Position position, Level level) {
 
-    public int checkDistanceDown(int capacity, Position position, Level level, Vector velocity) {
+        int possibleMove = 0;
 
-        Position cPos = new Position(relativeX+position.x, relativeY+position.y);
+        for(int i = 1; i < capacity; i++) {
 
-        int diffX = velocity.x < 0 ? 1 : -1;
+            if(level.isSolid(position.x+relativeX-i, position.y+relativeY)) break;
 
-        if(velocity.x == 0) diffX = 0;
-
-        for(int i = 0; i < capacity; i++) {
-
-            if(level.isSolid(cPos.x+diffX, cPos.y+i)) {
-
-                return -i;
-
-            }
-
+            possibleMove++;
         }
 
-        return -capacity;
+        return possibleMove;
 
     }
 
-    public int checkDistanceRight(int capacity, Position position, Level level) {
+    public int calculatePossibleMoveUp(int capacity, Position position, Level level) {
 
-        Position cPos = new Position(relativeX+position.x, relativeY+position.y+1);
+        int possibleMove = 0;
 
-        for(int i = 0; i < capacity; i++) {
+        for(int i = 1; i < capacity; i++) {
 
-            if(level.isSolid(cPos.x+i, cPos.y)) {
+            if(level.isSolid(position.x+relativeX, position.y+relativeY+i)) break;
 
-                return i;
-
-            }
-
+            possibleMove++;
         }
 
-        return capacity;
+        return possibleMove;
 
     }
 
-    public int checkDistanceX(int capacity, Position position, Level level) {
+    public int calculatePossibleMoveDown(int capacity, Position position, Level level) {
 
-        if(capacity > 0) return checkDistanceRight(capacity, position, level);
-        else if (capacity == 0) return 0;
-        else return checkDistanceLeft(-capacity, position, level);
+        int possibleMove = 0;
 
-    }
+        for(int i = 1; i < capacity; i++) {
 
-    public int checkDistanceLeft(int capacity, Position position, Level level) {
+            if(level.isSolid(position.x+relativeX, position.y+relativeY-i)) break;
 
-        Position cPos = new Position(relativeX+position.x, relativeY+position.y+1);
-
-        for(int i = 0; i < capacity; i++) {
-
-            if(level.isSolid(cPos.x-i, cPos.y)) {
-
-                return -i;
-
-            }
-
+            possibleMove++;
         }
 
-        return -capacity;
+        return possibleMove;
+
+    }
+
+    public boolean isInBlock(Position position, Level level) {
+
+        return level.isSolid(new Position(position.x+relativeX, position.y+relativeY));
+
+    }
+
+    public void render(SpriteBatch batch, Position playerPosition, Level level){
+
+        batch.draw(region, playerPosition.x+relativeX-1, playerPosition.y+relativeY-1, 3 ,3);
 
     }
 

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import me.kgaz.Main;
+
 import me.kgaz.physics.CollisionBox;
 import me.kgaz.physics.CollisionCheck;
 import me.kgaz.physics.Position;
@@ -33,6 +34,9 @@ public class Player {
     private TextureAtlas playerAtlas;
 
     private TextureRegion STANDING;
+    private TextureRegion JUMP_FALLING;
+    private TextureRegion[] WALK_ANIM;
+    private TextureRegion PREPARE_JUMP;
 
     private GameScreen screen;
 
@@ -41,6 +45,8 @@ public class Player {
 
     private Vector velocity;
 
+    public float spaceTime;
+
     public Player(Main owner, Position position, GameScreen gameScreen) {
 
         this.screen = gameScreen;
@@ -48,25 +54,42 @@ public class Player {
         this.playerAtlas = owner.getAssets().PLAYER_TEXTURES;
 
         this.STANDING = playerAtlas.findRegion("playerStand");
+        this.JUMP_FALLING = playerAtlas.findRegion("playerJumpFalling");
+
+        WALK_ANIM = new TextureRegion[] {
+                playerAtlas.findRegion("playerMoveLeftFoot"),
+                playerAtlas.findRegion("playerRunningMiddle"),
+                playerAtlas.findRegion("playerMoveRightFoot"),
+                playerAtlas.findRegion("playerRunningMiddle")
+        };
+
+        this.PREPARE_JUMP = playerAtlas.findRegion("playerSquat");
 
         this.game = owner;
 
         this.loc = position;
 
+        this.spaceTime = 0;
+
         this.facing = true;
 
-        this.collision = new CollisionBox();
+        this.collision = new CollisionBox(game.getAssets());
 
         GRAVITY_VECTOR = new Vector(0, 0);
         INPUT_VECTOR = new Vector(0, 0);
 
         velocity = new Vector(0, 0);
 
+        animKlatka = 0;
+        lastAnim = System.currentTimeMillis();
+
     }
 
     private Vector getInputVector(){
 
         Vector vector = new Vector(0, 0);
+
+        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) return vector;
 
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
 
@@ -96,10 +119,11 @@ public class Player {
 
     }
 
+    private static final Vector groundVector = new Vector(0, -1);
+
     public boolean isOnGround(){
 
-        return screen.getDisplayedLevel().isSolid(new Position(loc.x, loc.y-1)) || screen.getDisplayedLevel().isSolid(new Position(loc.x+PLAYER_WIDTH, loc.y-1));
-
+        return collision.isOnGround(loc, screen.getDisplayedLevel());
     }
 
     private void updateVectors(){
@@ -108,7 +132,7 @@ public class Player {
 
         if(isOnGround()) {
 
-            GRAVITY_VECTOR.multiply(0);
+            if(GRAVITY_VECTOR.y <= 0) GRAVITY_VECTOR.multiply(0);
 
             INPUT_VECTOR.add(input);
 
@@ -120,17 +144,32 @@ public class Player {
 
         } else {
 
-            if(GRAVITY_VECTOR.y == 0) {
+            if(GRAVITY_VECTOR.y == 0) GRAVITY_VECTOR.y = -2.5f;
 
-                GRAVITY_VECTOR.y = -2.5f;
+            if(GRAVITY_VECTOR.x < 0.5 && GRAVITY_VECTOR.x > -0.5) GRAVITY_VECTOR.x = 0;
+
+            if(GRAVITY_VECTOR.y > -2.5 && GRAVITY_VECTOR.y < 6) {
+
+                GRAVITY_VECTOR.y -= 1;
 
             }
 
-            INPUT_VECTOR.add(input.multiply(0.55));
+            if(GRAVITY_VECTOR.y > 0) {
 
-            INPUT_VECTOR.x *= 0.82;
+                GRAVITY_VECTOR.y*=0.94;
 
-            GRAVITY_VECTOR.multiply(1.09);
+                if(GRAVITY_VECTOR.y < 0.3 && GRAVITY_VECTOR.y > 0) GRAVITY_VECTOR.y = -GRAVITY_VECTOR.y;
+
+            }
+
+            INPUT_VECTOR.x *= 0.9;
+
+            if(GRAVITY_VECTOR.y < 0) {
+
+                GRAVITY_VECTOR.x *= 0.9f;
+
+                GRAVITY_VECTOR.multiply(1.09);
+            }
 
             if(GRAVITY_VECTOR.y < -35) GRAVITY_VECTOR.y = -35;
 
@@ -155,9 +194,10 @@ public class Player {
 
     public void update(Level level){
 
+
         calcVectors();
 
-        velocity = collision.checkMovement(velocity, loc, level);
+        velocity = collision.calculateMovement(velocity, loc, level);
 
         loc.add(velocity);
 
@@ -167,14 +207,50 @@ public class Player {
 
     }
 
+    private int animKlatka;
+    private long lastAnim;
 
     public void render(SpriteBatch batch, Level level) {
 
         update(level);
 
-        if(facing) batch.draw(STANDING, loc.x, loc.y, PLAYER_WIDTH, PLAYER_HEIGHT);
-        else batch.draw(STANDING, loc.x+PLAYER_WIDTH, loc.y, -PLAYER_WIDTH, PLAYER_HEIGHT);
+        TextureRegion renderRegion = STANDING;
 
+        boolean onGround = isOnGround();
+
+        if(!onGround)  {
+            renderRegion = JUMP_FALLING;
+            animKlatka = 0;
+            lastAnim = System.currentTimeMillis();
+        }
+
+        if(onGround && (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D))) {
+
+            if(System.currentTimeMillis() - lastAnim > 80l) {
+
+                lastAnim = System.currentTimeMillis();
+                animKlatka++;
+
+                if(animKlatka == 4) animKlatka = 0;
+
+            }
+
+            renderRegion = WALK_ANIM[animKlatka];
+
+
+        } else {
+
+            animKlatka = 0;
+            lastAnim = System.currentTimeMillis();
+
+        }
+
+        if(spaceTime > 0) renderRegion = PREPARE_JUMP;
+
+        if(facing) batch.draw(renderRegion, loc.x, loc.y, PLAYER_WIDTH, PLAYER_HEIGHT);
+        else batch.draw(renderRegion, loc.x+PLAYER_WIDTH, loc.y, -PLAYER_WIDTH, PLAYER_HEIGHT);
+
+        collision.render(batch, loc, level);
 
     }
 
