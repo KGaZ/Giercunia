@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import me.kgaz.Main;
 
 import me.kgaz.physics.CollisionBox;
-import me.kgaz.physics.CollisionCheck;
 import me.kgaz.physics.Position;
 import me.kgaz.physics.Vector;
 import me.kgaz.screens.GameScreen;
@@ -21,11 +20,9 @@ public class Player {
 
     public Position loc;
 
-    public static final Vector GRAVITY = new Vector(0, -5);
-
     public static final int PLAYER_HEIGHT = 64, PLAYER_WIDTH = 64;
-
-    public static final float PLAYER_SPEED = 2;
+    public static final float GRAVITY_SPEED = -0.7f;
+    public static final float PLAYER_SPEED = 0.7f;
 
     private Main game;
 
@@ -39,9 +36,6 @@ public class Player {
     private TextureRegion PREPARE_JUMP;
 
     private GameScreen screen;
-
-    private Vector GRAVITY_VECTOR;
-    private Vector INPUT_VECTOR;
 
     private Vector velocity;
 
@@ -74,9 +68,6 @@ public class Player {
         this.facing = true;
 
         this.collision = new CollisionBox(game.getAssets());
-
-        GRAVITY_VECTOR = new Vector(0, 0);
-        INPUT_VECTOR = new Vector(0, 0);
 
         velocity = new Vector(0, 0);
 
@@ -115,7 +106,13 @@ public class Player {
 //
 //        }
 
-        return vector.normalize().multiply(PLAYER_SPEED);
+        return vector.multiply(PLAYER_SPEED);
+
+    }
+
+    public void click(float a, float b) {
+
+        loc = new Position(a, b);
 
     }
 
@@ -123,83 +120,108 @@ public class Player {
 
     public boolean isOnGround(){
 
-        return collision.isOnGround(loc, screen.getDisplayedLevel());
+        return collision.calculateMovement(groundVector, loc, screen.getDisplayedLevel()).y == 0;
     }
 
-    private void updateVectors(){
+    public void jump(float strength) {
 
-        Vector input = getInputVector();
+        if(strength < 0.2) strength = 0.2f;
 
-        if(isOnGround()) {
+        Vector vector = new Vector(0, 0);
 
-            if(GRAVITY_VECTOR.y <= 0) GRAVITY_VECTOR.multiply(0);
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
 
-            INPUT_VECTOR.add(input);
-
-            INPUT_VECTOR.x *= 0.83;
-
-            if(Math.abs(INPUT_VECTOR.x) < 0.5) INPUT_VECTOR.x = 0;
-
-            if(Math.abs(INPUT_VECTOR.x) > 6) INPUT_VECTOR.x = INPUT_VECTOR.x > 0 ? 6 : -6;
-
-        } else {
-
-            if(GRAVITY_VECTOR.y == 0) GRAVITY_VECTOR.y = -2.5f;
-
-            if(GRAVITY_VECTOR.x < 0.5 && GRAVITY_VECTOR.x > -0.5) GRAVITY_VECTOR.x = 0;
-
-            if(GRAVITY_VECTOR.y > -2.5 && GRAVITY_VECTOR.y < 6) {
-
-                GRAVITY_VECTOR.y -= 1;
-
-            }
-
-            if(GRAVITY_VECTOR.y > 0) {
-
-                GRAVITY_VECTOR.y*=0.94;
-
-                if(GRAVITY_VECTOR.y < 0.3 && GRAVITY_VECTOR.y > 0) GRAVITY_VECTOR.y = -GRAVITY_VECTOR.y;
-
-            }
-
-            INPUT_VECTOR.x *= 0.9;
-
-            if(GRAVITY_VECTOR.y < 0) {
-
-                GRAVITY_VECTOR.x *= 0.9f;
-
-                GRAVITY_VECTOR.multiply(1.09);
-            }
-
-            if(GRAVITY_VECTOR.y < -35) GRAVITY_VECTOR.y = -35;
+            vector.x+=10;
 
         }
 
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
 
+            vector.x-=10;
+
+        }
+
+        vector.y = 25;
+
+        vector.y *= strength;
+
+        velocity.add(vector);
     }
 
 
     private void calcVectors(){
 
-        updateVectors();
+        if(Math.abs(velocity.x) <= 0.1) velocity.x = 0;
+        if(Math.abs(velocity.y) <= 0.1) velocity.y = 0;
 
-        velocity = new Vector(0, 0).add(INPUT_VECTOR).add(GRAVITY_VECTOR);
+        boolean onGround = isOnGround();
+
+        if(!onGround) {
+
+            velocity.add(new Vector(0, GRAVITY_SPEED));
+
+        } else {
+
+            if(velocity.y < 0) velocity.y = 0;
+
+            if(Math.abs(velocity.x) > 8) return;
+
+            Vector input = getInputVector();
+
+            velocity.add(input);
+
+            if(input.x == 0) velocity.multiply(new Vector(0.74f, 1f));
+
+            velocity.multiply(new Vector(0.91f, 1f));
+        }
+
     }
 
-    public void click(float x, float y) {
-
-        this.loc = new Position(x, y);
-
+    public String getVectorStringDebug(){
+        return "Vector X: "+velocity.x+" Y: "+velocity.y;
     }
 
     public void update(Level level){
 
-
         calcVectors();
+
+        if(isOnGround() && Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+
+            velocity.x = 0;
+
+            spaceTime += Gdx.graphics.getDeltaTime();
+
+            if(spaceTime > 0.8) {
+
+                jump(1);
+
+                spaceTime = 0;
+
+            }
+
+        } else if(spaceTime > 0) {
+
+            if(spaceTime < 0.15) spaceTime = 0;
+
+            else {
+
+                float strength = spaceTime/0.8f;
+
+                jump(strength);
+
+                spaceTime = 0;
+
+            }
+
+        }
+
+        String before = getVectorStringDebug();
 
         velocity = collision.calculateMovement(velocity, loc, level);
 
-        loc.add(velocity);
+        System.out.println(before+" | "+getVectorStringDebug());
+
+        if(!Gdx.input.isTouched()) loc.add(velocity);
 
         if(velocity.x == 0) return;
 
@@ -226,7 +248,7 @@ public class Player {
 
         if(onGround && (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D))) {
 
-            if(System.currentTimeMillis() - lastAnim > 80l) {
+            if(System.currentTimeMillis() - lastAnim > 100L) {
 
                 lastAnim = System.currentTimeMillis();
                 animKlatka++;

@@ -23,6 +23,15 @@ public class Position {
         this.x+=vector.x;
         this.y+=vector.y;
 
+        this.normalize();
+
+    }
+
+    public Position normalize(){
+        x = (int) x;
+        y = (int) y;
+
+        return this;
     }
 
 }

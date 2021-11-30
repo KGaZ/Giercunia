@@ -9,13 +9,13 @@ import me.kgaz.world.Level;
 
 public class CollisionBox {
 
-    public Array<CollisionCheck> colliionChecks;
+    public Array<CollisionCheck> collisionChecks;
 
     public CollisionBox(Assets assets){
 
         Texture t = assets.GREEN_DOT;
 
-        colliionChecks = new Array<CollisionCheck>();
+        collisionChecks = new Array<CollisionCheck>();
 
         for(int i = 0; i <= 6; i++) {
 
@@ -25,7 +25,7 @@ public class CollisionBox {
 
                 int y = (h*6);
 
-                if((x == 12 || x == 48) || (y == 0 || y == 48)) colliionChecks.add(new CollisionCheck(x, y, t));
+                if((x == 12 || x == 48) || (y == 0 || y == 48)) collisionChecks.add(new CollisionCheck(x, y));
 
             }
 
@@ -35,35 +35,151 @@ public class CollisionBox {
 
     public Vector calculateMovement(Vector movement, Position position, Level level) {
 
-        int possibleX = (int) movement.x, possibleY = (int) movement.y;
+        float possibleX = movement.x;
+        float possibleY = movement.y;
 
-        for(CollisionCheck check : colliionChecks) {
+        // patrzymy co jest wieksze
 
-            Vector possible = check.calculateMovement(movement, position, level);
+        if(possibleX > possibleY) {
 
-            if(possibleX < 0 && possible.x > possibleX) {
-                possibleX = (int) possible.x;
-            } else if(possibleX >= 0 && possible.x < possibleX) possibleX = (int) possible.x;
+            // najpierw X, potem Y
 
-            if(possibleY< 0 && possible.y > possibleY) {
-                possibleY = (int) possible.y;
-            } else if(possibleY >= 0 && possible.y < possibleY) possibleY = (int) possible.y;
+            if(possibleX != 0) {
 
-            if(possibleX == 0 && possibleY == 0) return new Vector(0,0);
+                if(possibleX > 0) {
+
+                    for(CollisionCheck check : collisionChecks) {
+
+                        float work = check.checkDistanceRight(possibleX, level, position);
+
+                        if(work < possibleX) possibleX = work;
+
+                        if(work == 0) break;
+
+                    }
+
+                } else if (possibleX < 0){
+
+                    for(CollisionCheck check : collisionChecks) {
+
+                        float work = check.checkDistanceLeft(-possibleX, level, position);
+
+                        if(work > possibleX) possibleX = work;
+
+                        if(work == 0) break;
+
+                    }
+
+                }
+
+            }
+
+            // liczymy Y
+
+            if(possibleY != 0) {
+
+                if(possibleY > 0) {
+
+                    for(CollisionCheck check : collisionChecks) {
+
+                        float work = check.checkDistanceUp(possibleY, level, new Position(position.x + possibleX, position.y));
+
+                        if(work < possibleY) possibleY = work;
+
+                        if(work == 0) break;
+
+                    }
+
+                } else {
+
+                    for(CollisionCheck check : collisionChecks) {
+
+                        float work = check.checkDistanceDown(-possibleY, level, new Position(position.x + possibleX, position.y));
+
+                        if(work > possibleY) possibleY = work;
+
+                        if(work == 0) break;
+
+                    }
+
+                }
+
+            }
+
+        } else {
+
+            // najpierw Y, potem X
+
+            if(possibleY != 0) {
+
+                if(possibleY > 0) {
+
+                    for(CollisionCheck check : collisionChecks) {
+
+                        float work = check.checkDistanceUp(possibleY, level, position);
+
+                        if(work < possibleY) possibleY = work;
+
+                        if(work == 0) break;
+
+                    }
+
+                } else {
+
+                    for(CollisionCheck check : collisionChecks) {
+
+                        float work = check.checkDistanceDown(-possibleY, level, position);
+
+                        if(work > possibleY) possibleX = work;
+
+                        if(work == 0) break;
+
+                    }
+
+                }
+
+                if(possibleX != 0) {
+
+                    if (possibleX > 0) {
+
+                        for (CollisionCheck check : collisionChecks) {
+
+                            float work = check.checkDistanceRight(possibleX, level, new Position(position.x, position.y + possibleY));
+
+                            if (work < possibleX) possibleX = work;
+
+                            if (work == 0) break;
+
+                        }
+
+                    } else {
+
+                        for (CollisionCheck check : collisionChecks) {
+
+                            float work = check.checkDistanceLeft(-possibleX, level, new Position(position.x, position.y + possibleY));
+
+                            if (work > possibleX) possibleX = work;
+
+                            if (work == 0) break;
+
+                        }
+
+                    }
+
+                }
+
+            }
 
         }
-
         return new Vector(possibleX, possibleY);
 
     }
 
     public boolean isOnGround(Position position, Level level) {
 
-        Position newPos = new Position(position.x, position.y-1);
+        for(CollisionCheck check : collisionChecks) {
 
-        for(CollisionCheck check : colliionChecks) {
-
-            if(check.isInBlock(newPos,level)) return true;
+            if(check.checkDistanceDown(1, level, position) == 0) return true;
 
         }
 
@@ -72,8 +188,8 @@ public class CollisionBox {
     }
 
     public void render(SpriteBatch batch, Position position, Level level){
-
-        colliionChecks.forEach(check -> check.render(batch, position, level));
+//
+//        colliionChecks.forEach(check -> check.render(batch, position, level));
 
     }
 

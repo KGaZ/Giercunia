@@ -10,8 +10,8 @@ me/kgaz/world/Level.java
  me.kgaz.world.Level
 me/kgaz/screens/GameScreen.java
  me.kgaz.screens.GameScreen
-me/kgaz/physics/CollisionBox.java
- me.kgaz.physics.CollisionBox
+me/kgaz/player/Player.java
+ me.kgaz.player.Player
 me/kgaz/screens/MenuScreen.java
  me.kgaz.screens.MenuScreen
  me.kgaz.screens.MenuScreen$1
@@ -27,6 +27,9 @@ me/kgaz/Main.java
  me.kgaz.Main
 me/kgaz/userInterface/UIManager.java
  me.kgaz.userInterface.UIManager
+me/kgaz/physics/CollisionData.java
+ me.kgaz.physics.CollisionData
+ me.kgaz.physics.CollisionData$CollisionType
 me/kgaz/userInterface/UI.java
  me.kgaz.userInterface.UI
 me/kgaz/assets/Assets.java
@@ -35,7 +38,7 @@ me/kgaz/utils/LevelBuilder.java
  me.kgaz.utils.LevelBuilder
 me/kgaz/userInterface/elements/Button.java
  me.kgaz.userInterface.elements.Button
+me/kgaz/physics/CollisionBox.java
+ me.kgaz.physics.CollisionBox
 me/kgaz/physics/CollisionCheck.java
  me.kgaz.physics.CollisionCheck
-me/kgaz/player/Player.java
- me.kgaz.player.Player

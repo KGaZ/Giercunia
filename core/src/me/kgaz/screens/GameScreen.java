@@ -73,7 +73,7 @@ public class GameScreen implements Screen {
 
         currentLevel.renderForeGround(game.batch);
 
-        game.manager.ARIAL.draw(batch, "FPS: "+ Gdx.graphics.getFramesPerSecond()+". Ver. InDev 1.01\nFrame Time: "+Gdx.graphics.getDeltaTime()+"ms\nX: "+player.loc.x+" Y: "+player.loc.y+"\nGround: "+player.isOnGround()+"\nPlayer Jump Time: "+player.spaceTime, 0, 1080);
+        game.manager.ARIAL.draw(batch, "FPS: "+ Gdx.graphics.getFramesPerSecond()+". Ver. InDev 1.01\nFrame Time: "+Gdx.graphics.getDeltaTime()+"ms\nX: "+player.loc.x+" Y: "+player.loc.y+"\nGround: "+player.isOnGround()+"\nPlayer Jump Time: "+player.spaceTime+"\n"+player.getVectorStringDebug(), 0, 1080);
 
         game.batch.end();
     }
