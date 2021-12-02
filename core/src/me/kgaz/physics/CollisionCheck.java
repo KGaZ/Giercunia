@@ -1,10 +1,12 @@
 package me.kgaz.physics;
 
+import me.kgaz.player.Player;
 import me.kgaz.world.Level;
 
 public class CollisionCheck {
 
-    private float relativeX, relativeY;
+    private final float relativeX;
+    private final float relativeY;
 
     public CollisionCheck(float x, float y) {
 
@@ -13,79 +15,35 @@ public class CollisionCheck {
 
     }
 
-    // work
-    private float possibleMove = 0, i = 0;
-    private Position workPosition = new Position(0, 0);
+    public CollisionData.CollisionType canMove(Player player, Vector vector, Position position, Level level) {
 
-    public float checkDistanceLeft(float capacity, Level level, Position position) {
+        if(level.isSolid(player, position.x + relativeX + vector.x, position.y + relativeY + vector.y)) {
 
-        possibleMove = 0;
+            if(vector.x >= vector.y) {
 
-        for(i = 0; i < capacity; i+=0.1f) {
+                if(level.isSolid(player, position.x + relativeX + vector.x, position.y + relativeY)) {
 
-            workPosition = new Position(relativeX - i - i + position.x, position.y + relativeY);
+                    return vector.x > 0 ? CollisionData.CollisionType.HIT_WALL_RIGHT : CollisionData.CollisionType.HIT_WALL_LEFT;
 
-            if(level.isSolid(workPosition)) return possibleMove;
+                }
 
-            possibleMove += 0.1f;
+                return vector.y > 0 ? CollisionData.CollisionType.HIT_WALL_UP : CollisionData.CollisionType.HIT_WALL_DOWN;
 
-        }
+            } else {
 
-        return -possibleMove;
+                if(level.isSolid(player, position.x + relativeX, position.y + relativeY + vector.y)) {
 
-    }
+                    return vector.y > 0 ? CollisionData.CollisionType.HIT_WALL_UP : CollisionData.CollisionType.HIT_WALL_DOWN;
 
-    public float checkDistanceRight(float capacity, Level level, Position position) {
+                }
 
-        possibleMove = 0;
+                return vector.x > 0 ? CollisionData.CollisionType.HIT_WALL_RIGHT : CollisionData.CollisionType.HIT_WALL_LEFT;
 
-        for(i = 0; i < capacity; i+=0.1f) {
-
-            workPosition = new Position(relativeX + (1f) + i + position.x, position.y + relativeY);
-
-            if(level.isSolid(workPosition)) return possibleMove;
-
-            possibleMove += 0.1f;
+            }
 
         }
 
-        return possibleMove;
-
-    }
-
-    public float checkDistanceUp(float capacity, Level level, Position position) {
-
-        possibleMove = 0;
-
-        for(i = 0; i < capacity; i+=0.1f) {
-
-            workPosition = new Position(relativeX + position.x, position.y + relativeY + i + 1f);
-
-            if(level.isSolid(workPosition)) return possibleMove;
-
-            possibleMove += 0.1f;
-
-        }
-
-        return possibleMove;
-
-    }
-
-    public float checkDistanceDown(float capacity, Level level, Position position) {
-
-        possibleMove = 0;
-
-        for(i = 0; i < capacity; i+=0.1f) {
-
-            workPosition = new Position(relativeX + position.x, position.y + relativeY - i - 1f);
-
-            if(level.isSolid(workPosition)) return possibleMove;
-
-            possibleMove += 0.1f;
-
-        }
-
-        return -possibleMove;
+        return CollisionData.CollisionType.NO_COLLISION;
 
     }
 

@@ -10,8 +10,9 @@ me/kgaz/world/Level.java
  me.kgaz.world.Level
 me/kgaz/screens/GameScreen.java
  me.kgaz.screens.GameScreen
-me/kgaz/player/Player.java
- me.kgaz.player.Player
+me/kgaz/physics/CollisionBox.java
+ me.kgaz.physics.CollisionBox
+ me.kgaz.physics.CollisionBox$1
 me/kgaz/screens/MenuScreen.java
  me.kgaz.screens.MenuScreen
  me.kgaz.screens.MenuScreen$1
@@ -19,12 +20,22 @@ me/kgaz/world/Tiles.java
  me.kgaz.world.Tiles
 me/kgaz/garbage/DisposeManager.java
  me.kgaz.garbage.DisposeManager
+me/kgaz/world/levels/Level01.java
+ me.kgaz.world.levels.Level01
 me/kgaz/garbage/Dispose.java
  me.kgaz.garbage.Dispose
 me/kgaz/world/Tile.java
  me.kgaz.world.Tile
 me/kgaz/Main.java
  me.kgaz.Main
+me/kgaz/utils/LevelUtil.java
+ me.kgaz.utils.LevelUtil
+ me.kgaz.utils.LevelUtil$1
+ me.kgaz.utils.LevelUtil$LevelPosition
+ me.kgaz.utils.LevelUtil$LevelPosition$1
+ me.kgaz.utils.LevelUtil$LevelPosition$2
+ me.kgaz.utils.LevelUtil$LevelPosition$3
+ me.kgaz.utils.LevelUtil$LevelPosition$4
 me/kgaz/userInterface/UIManager.java
  me.kgaz.userInterface.UIManager
 me/kgaz/physics/CollisionData.java
@@ -38,7 +49,7 @@ me/kgaz/utils/LevelBuilder.java
  me.kgaz.utils.LevelBuilder
 me/kgaz/userInterface/elements/Button.java
  me.kgaz.userInterface.elements.Button
-me/kgaz/physics/CollisionBox.java
- me.kgaz.physics.CollisionBox
 me/kgaz/physics/CollisionCheck.java
  me.kgaz.physics.CollisionCheck
+me/kgaz/player/Player.java
+ me.kgaz.player.Player

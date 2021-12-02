@@ -22,6 +22,22 @@ public class LevelBuilder {
 
     }
 
+    public LevelBuilder empty(int x, int y, int width, int height) {
+
+        for(int i = x; i < x+width; i++) {
+
+            for(int h = y; h < y+height; h++) {
+
+                work[i][h] = 0;
+
+            }
+
+        }
+
+        return this;
+
+    }
+
     public LevelBuilder fillBlock(int x, int y, int width, int height) {
 
         for(int i = x; i < x+width; i++) {

@@ -9,9 +9,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import me.kgaz.Main;
 
 import me.kgaz.physics.CollisionBox;
+import me.kgaz.physics.CollisionData;
 import me.kgaz.physics.Position;
 import me.kgaz.physics.Vector;
 import me.kgaz.screens.GameScreen;
+import me.kgaz.utils.LevelUtil;
 import me.kgaz.world.Level;
 
 public class Player {
@@ -34,6 +36,9 @@ public class Player {
     private TextureRegion JUMP_FALLING;
     private TextureRegion[] WALK_ANIM;
     private TextureRegion PREPARE_JUMP;
+    private TextureRegion PLAYER_JUMP_UP;
+    private TextureRegion PLAYER_BOUNCED_WALL;
+    private TextureRegion PLAYER_LAYING;
 
     private GameScreen screen;
 
@@ -56,6 +61,12 @@ public class Player {
                 playerAtlas.findRegion("playerMoveRightFoot"),
                 playerAtlas.findRegion("playerRunningMiddle")
         };
+
+        this.PLAYER_BOUNCED_WALL = playerAtlas.findRegion("playerBounceWall");
+
+        this.PLAYER_JUMP_UP = playerAtlas.findRegion("playerJumpUp");
+
+        this.PLAYER_LAYING = playerAtlas.findRegion("playerLay");
 
         this.PREPARE_JUMP = playerAtlas.findRegion("playerSquat");
 
@@ -80,16 +91,22 @@ public class Player {
 
         Vector vector = new Vector(0, 0);
 
-        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) return vector;
+        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+
+            laying = false;
+            return vector;
+        }
 
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
 
+            laying = false;
             vector.x+=1;
 
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
 
+            laying = false;
             vector.x-=1;
 
         }
@@ -110,17 +127,23 @@ public class Player {
 
     }
 
-    public void click(float a, float b) {
+    public void changeLevel(Level level, LevelUtil.LevelPosition position) {
 
-        loc = new Position(a, b);
+        loc = position.changePosition((int) loc.x, (int) loc.y);
+
+        screen.setDisplayedLevel(level);
 
     }
 
-    private static final Vector groundVector = new Vector(0, -1);
+    public void click(float a, float b) {
+
+      // loc = new Position(a, b);
+
+    }
 
     public boolean isOnGround(){
 
-        return collision.calculateMovement(groundVector, loc, screen.getDisplayedLevel()).y == 0;
+        return collision.isOnGround(this, loc, screen.getDisplayedLevel());
     }
 
     public void jump(float strength) {
@@ -148,6 +171,21 @@ public class Player {
         velocity.add(vector);
     }
 
+    private boolean bounced = false;
+    private boolean laying = false;
+
+    public void bounced() {
+
+        bounced = true;
+
+    }
+
+    public void fellDown() {
+
+        laying = true;
+
+    }
+
 
     private void calcVectors(){
 
@@ -162,17 +200,21 @@ public class Player {
 
         } else {
 
-            if(velocity.y < 0) velocity.y = 0;
+            bounced = false;
 
-            if(Math.abs(velocity.x) > 8) return;
+            if(velocity.y < 0) velocity.y = 0;
 
             Vector input = getInputVector();
 
-            velocity.add(input);
+            velocity.multiply(new Vector(0.91f, 1f));
 
             if(input.x == 0) velocity.multiply(new Vector(0.74f, 1f));
 
-            velocity.multiply(new Vector(0.91f, 1f));
+            if(Math.abs(velocity.x) > 8) return;
+
+            velocity.add(input);
+
+
         }
 
     }
@@ -217,7 +259,7 @@ public class Player {
 
         String before = getVectorStringDebug();
 
-        velocity = collision.calculateMovement(velocity, loc, level);
+        velocity = collision.calculateMovement(this, velocity, loc, level);
 
         System.out.println(before+" | "+getVectorStringDebug());
 
@@ -232,6 +274,20 @@ public class Player {
     private int animKlatka;
     private long lastAnim;
 
+    public String getLastCollision(){
+
+        return "Last Collision: "+lastType.toString();
+
+    }
+
+    private CollisionData.CollisionType lastType = CollisionData.CollisionType.NO_COLLISION;
+
+    public void debugCollision(CollisionData.CollisionType type) {
+
+        lastType = type;
+
+    }
+
     public void render(SpriteBatch batch, Level level) {
 
         update(level);
@@ -241,12 +297,27 @@ public class Player {
         boolean onGround = isOnGround();
 
         if(!onGround)  {
-            renderRegion = JUMP_FALLING;
+
+            renderRegion = velocity.y > 0 ? PLAYER_JUMP_UP : JUMP_FALLING;
             animKlatka = 0;
             lastAnim = System.currentTimeMillis();
+
+            if(bounced) {
+
+                renderRegion = PLAYER_BOUNCED_WALL;
+
+            }
         }
 
-        if(onGround && (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D))) {
+        if(laying) {
+
+            animKlatka = 0;
+            lastAnim = System.currentTimeMillis();
+            renderRegion = PLAYER_LAYING;
+
+        }
+
+        if(onGround && (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) && !laying) {
 
             if(System.currentTimeMillis() - lastAnim > 100L) {
 

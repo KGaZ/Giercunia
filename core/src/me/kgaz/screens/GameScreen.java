@@ -33,6 +33,12 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 1920, 1080);
     }
 
+    public void setDisplayedLevel(Level level) {
+
+        this.currentLevel = level;
+
+    }
+
     public Level getDisplayedLevel(){
         return currentLevel;
     }
@@ -73,7 +79,7 @@ public class GameScreen implements Screen {
 
         currentLevel.renderForeGround(game.batch);
 
-        game.manager.ARIAL.draw(batch, "FPS: "+ Gdx.graphics.getFramesPerSecond()+". Ver. InDev 1.01\nFrame Time: "+Gdx.graphics.getDeltaTime()+"ms\nX: "+player.loc.x+" Y: "+player.loc.y+"\nGround: "+player.isOnGround()+"\nPlayer Jump Time: "+player.spaceTime+"\n"+player.getVectorStringDebug(), 0, 1080);
+        game.manager.ARIAL.draw(batch, "FPS: "+ Gdx.graphics.getFramesPerSecond()+". Ver. Dev 2 DEMO\nFrame Time: "+Gdx.graphics.getDeltaTime()+"ms\nX: "+player.loc.x+" Y: "+player.loc.y+"\nGround: "+player.isOnGround()+"\nPlayer Jump Time: "+player.spaceTime+"\n"+player.getVectorStringDebug()+"\n"+player.getLastCollision(), 0, 1080);
 
         game.batch.end();
     }

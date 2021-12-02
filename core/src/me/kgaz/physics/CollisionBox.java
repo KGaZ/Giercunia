@@ -2,9 +2,9 @@ package me.kgaz.physics;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import me.kgaz.assets.Assets;
+import me.kgaz.player.Player;
 import me.kgaz.world.Level;
 
 public class CollisionBox {
@@ -33,153 +33,82 @@ public class CollisionBox {
 
     }
 
-    public Vector calculateMovement(Vector movement, Position position, Level level) {
+    public Vector calculateMovement(Player player, Vector movement, Position position, Level level) {
 
-        float possibleX = movement.x;
-        float possibleY = movement.y;
+        for(CollisionCheck check : collisionChecks) {
 
-        // patrzymy co jest wieksze
+            CollisionData.CollisionType collisionType = check.canMove(player, movement, position, level);
 
-        if(possibleX > possibleY) {
+            if(collisionType != CollisionData.CollisionType.NO_COLLISION) {
 
-            // najpierw X, potem Y
+                switch(collisionType) {
 
-            if(possibleX != 0) {
+                    case HIT_WALL_LEFT:
 
-                if(possibleX > 0) {
+                        player.debugCollision(CollisionData.CollisionType.HIT_WALL_LEFT);
 
-                    for(CollisionCheck check : collisionChecks) {
+                        if(Math.abs(movement.x) > 5 && !player.isOnGround()) {
 
-                        float work = check.checkDistanceRight(possibleX, level, position);
+                            player.bounced();
 
-                        if(work < possibleX) possibleX = work;
-
-                        if(work == 0) break;
-
-                    }
-
-                } else if (possibleX < 0){
-
-                    for(CollisionCheck check : collisionChecks) {
-
-                        float work = check.checkDistanceLeft(-possibleX, level, position);
-
-                        if(work > possibleX) possibleX = work;
-
-                        if(work == 0) break;
-
-                    }
-
-                }
-
-            }
-
-            // liczymy Y
-
-            if(possibleY != 0) {
-
-                if(possibleY > 0) {
-
-                    for(CollisionCheck check : collisionChecks) {
-
-                        float work = check.checkDistanceUp(possibleY, level, new Position(position.x + possibleX, position.y));
-
-                        if(work < possibleY) possibleY = work;
-
-                        if(work == 0) break;
-
-                    }
-
-                } else {
-
-                    for(CollisionCheck check : collisionChecks) {
-
-                        float work = check.checkDistanceDown(-possibleY, level, new Position(position.x + possibleX, position.y));
-
-                        if(work > possibleY) possibleY = work;
-
-                        if(work == 0) break;
-
-                    }
-
-                }
-
-            }
-
-        } else {
-
-            // najpierw Y, potem X
-
-            if(possibleY != 0) {
-
-                if(possibleY > 0) {
-
-                    for(CollisionCheck check : collisionChecks) {
-
-                        float work = check.checkDistanceUp(possibleY, level, position);
-
-                        if(work < possibleY) possibleY = work;
-
-                        if(work == 0) break;
-
-                    }
-
-                } else {
-
-                    for(CollisionCheck check : collisionChecks) {
-
-                        float work = check.checkDistanceDown(-possibleY, level, position);
-
-                        if(work > possibleY) possibleX = work;
-
-                        if(work == 0) break;
-
-                    }
-
-                }
-
-                if(possibleX != 0) {
-
-                    if (possibleX > 0) {
-
-                        for (CollisionCheck check : collisionChecks) {
-
-                            float work = check.checkDistanceRight(possibleX, level, new Position(position.x, position.y + possibleY));
-
-                            if (work < possibleX) possibleX = work;
-
-                            if (work == 0) break;
+                            return new Vector(-movement.x*0.7f, movement.y*0.9f - 0.5f);
 
                         }
 
-                    } else {
+                        return new Vector(0, 0);
 
-                        for (CollisionCheck check : collisionChecks) {
+                    case HIT_WALL_RIGHT:
 
-                            float work = check.checkDistanceLeft(-possibleX, level, new Position(position.x, position.y + possibleY));
+                        player.debugCollision(CollisionData.CollisionType.HIT_WALL_RIGHT);
 
-                            if (work > possibleX) possibleX = work;
+                        if(Math.abs(movement.x) > 5 && !player.isOnGround()) {
 
-                            if (work == 0) break;
+                            player.bounced();
+
+                            return new Vector(-movement.x*0.7f, movement.y*0.9f - 0.5f);
 
                         }
 
-                    }
+                        return new Vector(0, 0);
+
+                    case HIT_WALL_DOWN:
+
+                        player.debugCollision(CollisionData.CollisionType.HIT_WALL_DOWN);
+
+                        if(movement.y < -30) {
+
+                            player.fellDown();
+
+                        }
+
+                        return new Vector(0, 0);
+
+                    case HIT_WALL_UP:
+
+                        player.debugCollision(CollisionData.CollisionType.HIT_WALL_UP);
+
+                        player.bounced();
+
+                        return new Vector(movement.x*0.8f, movement.y*-0.5f);
+
 
                 }
 
             }
 
         }
-        return new Vector(possibleX, possibleY);
+
+        return movement;
 
     }
 
-    public boolean isOnGround(Position position, Level level) {
+    private static final Vector vectorGround = new Vector(0, -1);
+
+    public boolean isOnGround(Player player, Position position, Level level) {
 
         for(CollisionCheck check : collisionChecks) {
 
-            if(check.checkDistanceDown(1, level, position) == 0) return true;
+            if(check.canMove(player, vectorGround, position, level) != CollisionData.CollisionType.NO_COLLISION) return true;
 
         }
 
