@@ -18,7 +18,7 @@ public class DesktopLauncher {
 		config.width = 1440;
 		config.height = 810;
 
-		//config.foregroundFPS = 120;
+		config.foregroundFPS = 60;
 
 		config.fullscreen = true;
 
